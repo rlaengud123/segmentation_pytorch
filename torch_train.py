@@ -241,7 +241,7 @@ for epoch in range(1, epochs+1):
     model.eval()
 
     with torch.no_grad():
-        for (images, mask) in enumerate(tqdm(valid_loader)):
+        for i, (images, mask) in enumerate(tqdm(valid_loader)):
             images = torch.tensor(images, device=device, dtype=torch.float32)
             mask  = torch.tensor(mask, device=device, dtype=torch.float32)
 
