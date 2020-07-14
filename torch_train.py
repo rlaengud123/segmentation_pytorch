@@ -10,6 +10,7 @@ from datetime import datetime
 import albumentations as albu
 import cv2
 import easydict
+import gspread
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -17,6 +18,7 @@ import segmentation_models_pytorch as smp
 import torch
 import torch.nn as nn
 from albumentations import pytorch as AT  # 나중에 사용
+from oauth2client.service_account import ServiceAccountCredentials
 from sklearn.model_selection import train_test_split  # 나중에 사용
 from torch import sigmoid
 # from catalyst.utils import set_global_seed, prepare_cudnn
@@ -46,6 +48,27 @@ arg = easydict.EasyDict({
     'WORKERS' : 0,
     'Threshold' : 0.6
     })
+
+# 구글스프레드시트 설정
+scope = [
+'https://spreadsheets.google.com/feeds',
+'https://www.googleapis.com/auth/drive',
+]
+
+json_file_name = 'money-check-260910-c217b2d4ba6a.json'
+
+credentials = ServiceAccountCredentials.from_json_keyfile_name(json_file_name, scope) 
+gs = gspread.authorize(credentials)
+
+
+spreadsheet_url = 'https://docs.google.com/spreadsheets/d/1tpboitN1otWUB9sG7MQdoYG70pcxNZqBPBGZhp_ExX0/edit#gid=0'
+
+# 스프레스시트 문서 가져오기 
+doc = gs.open_by_url(spreadsheet_url)
+
+# 시트 선택하기
+worksheet = doc.worksheet('시트1')
+
 
 warnings.filterwarnings("ignore")
 
@@ -126,6 +149,7 @@ WORKERS = arg.WORKERS
 epochs = arg.epochs
 Threshold = arg.Threshold
 lr = arg.lr
+worker = 'Doohyung'
 
 time_path = datetime.today().strftime('%Y-%m-%d_%H%M%S')
 
@@ -146,6 +170,27 @@ valid_loader = DataLoader(valid_dataset, batch_size=BATCH_SIZE, shuffle=False, n
 writer = SummaryWriter(os.path.join('./results', time_path))
 
 save_setting_info(arg, os.path.join('./results', time_path), time_path)
+
+# 구글스프레드 시트 저장
+index = 1
+while 1:
+    value_list = worksheet.row_values(index)
+    if value_list == []:
+        index -= 1
+        break
+    index += 1
+
+valid_dice_score_max = 0
+valid_dice_epoch_max = 0
+
+arg_list = list(arg.values())
+arg_list.insert(0,time_path)
+arg_list.insert(0,index)
+arg_list.append(valid_dice_score_max)
+arg_list.append(valid_dice_epoch_max)
+arg_list.append(worker)
+arg_list[5] = 'None'
+worksheet.append_row(arg_list)
 
 # %%
 
@@ -221,11 +266,15 @@ for epoch in range(1, epochs+1):
             torch.save(model.module.state_dict(), './results/{}/best_model.pt'.format(time_path))
             print('model_saved')
             valid_dice_score_max = valid_dice_score
+            valid_dice_epoch_max = epoch
+            cell1 = 'L'+ str(index+1)
+            cell2 = 'M'+ str(index+1)
+            worksheet.update_acell(cell1, valid_dice_score_max)
+            worksheet.update_acell(cell2, valid_dice_epoch_max)
 
         if epoch % 5 == 0:
             torch.save(model.module.state_dict(), './results/{}/epoch_{}.pt'.format(time_path, epoch))
             print('model_saved')
-            valid_dice_score_max = valid_dice_score
 
 
         print(f'Valid: loss:{valid_epoch_loss:.3f} | dice score:{valid_dice_score:.3f}')
