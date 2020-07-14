@@ -44,7 +44,7 @@ arg = easydict.EasyDict({
     "BATCH_SIZE": 32,
     'lr' : 0.001,
     'WORKERS' : 0,
-    'Threshold' : 0.5
+    'Threshold' : 0.6
     })
 
 warnings.filterwarnings("ignore")
