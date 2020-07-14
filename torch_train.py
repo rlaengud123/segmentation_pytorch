@@ -147,7 +147,7 @@ writer = SummaryWriter(os.path.join('./results', time_path))
 
 save_setting_info(arg, os.path.join('./results', time_path), time_path)
 
-
+#'test'
 # %%
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
