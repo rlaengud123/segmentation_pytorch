@@ -185,7 +185,7 @@ for epoch in range(1, epochs+1):
         train_dice_score += dice_cof * images.size(0)
         
     # calculate average losses
-    train_epoch_loss = train_epoch_loss/len(train_loader.dataset)
+    train_epoch_loss = train_epoch_loss/len(train_loader)
     train_dice_score = train_dice_score/len(train_loader.dataset)
 
     print(f'Epoch:{epoch}')
@@ -211,7 +211,7 @@ for epoch in range(1, epochs+1):
             valid_dice_score += dice_cof * images.size(0)
 
         # calculate average losses
-        valid_epoch_loss = valid_epoch_loss/len(valid_loader.dataset)
+        valid_epoch_loss = valid_epoch_loss/len(valid_loader)
         valid_dice_score = valid_dice_score/len(valid_loader.dataset)
 
         print(f'valid_dice_score : {valid_dice_score}')
@@ -221,6 +221,12 @@ for epoch in range(1, epochs+1):
             torch.save(model.module.state_dict(), './results/{}/best_model.pt'.format(time_path))
             print('model_saved')
             valid_dice_score_max = valid_dice_score
+
+        if epoch % 5 == 0:
+            torch.save(model.module.state_dict(), './results/{}/epoch_{}.pt'.format(time_path, epoch))
+            print('model_saved')
+            valid_dice_score_max = valid_dice_score
+
 
         print(f'Valid: loss:{valid_epoch_loss:.3f} | dice score:{valid_dice_score:.3f}')
 
