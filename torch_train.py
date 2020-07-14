@@ -207,13 +207,13 @@ model = nn.DataParallel(model.to(device))
 train_start_time = time.time()
 
 valid_dice_score_max = 0
-for epoch in trange(1, epochs+1):
+for epoch in range(1, epochs+1):
     train_epoch_loss = 0
     train_dice_score = 0
 
     model.train()
     # Training
-    for i, (images, mask) in enumerate(train_loader):
+    for i, (images, mask) in enumerate(tqdm(train_loader)):
         images = torch.tensor(images, device=device, dtype=torch.float32)
         mask  = torch.tensor(mask, device=device, dtype=torch.float32)
 
@@ -267,7 +267,7 @@ for epoch in trange(1, epochs+1):
             print('model_saved')
             valid_dice_score_max = valid_dice_score
             valid_dice_epoch_max = epoch
-            
+
             index = 2
             while 1:
                 cell = 'B' + str(index)
