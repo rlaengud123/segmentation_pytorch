@@ -252,12 +252,3 @@ logdir=logdir,
 # specify which metrics we want to plot
 metrics=["loss", "dice", 'lr', '_base/lr'])
 '''
-
-
-# %%
-
-
-# %%
-
-
-# %%
