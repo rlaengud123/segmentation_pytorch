@@ -69,7 +69,7 @@ class MSI_valid_Dataset(Dataset):
     # 커스텀 dataset
     def __init__(self, transforms = albu.Compose([albu.HorizontalFlip(),AT.ToTensor()]), preprocessing=None, k_folds=1):
         
-        patch_loader = train_PatchLoader(n_kfold=k_folds, seed=42)
+        patch_loader = valid_PatchLoader(n_kfold=k_folds, seed=42)
         df = patch_loader.get_all_patches()
         
         self.len = df.shape[0]

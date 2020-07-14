@@ -9,6 +9,7 @@ from datetime import datetime
 
 import albumentations as albu
 import cv2
+import easydict
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -27,7 +28,6 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm, tqdm_notebook
 
-import easydict
 from configs import getConfig
 from model.data_loader import kfold_data_generator
 from model.dataset import MSI_train_Dataset, MSI_valid_Dataset
