@@ -28,7 +28,7 @@ from torch import sigmoid
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
-from tqdm import tqdm, tqdm_notebook
+from tqdm import tqdm, tqdm_notebook, trange
 
 from configs import getConfig
 from model.data_loader import kfold_data_generator
@@ -207,7 +207,7 @@ model = nn.DataParallel(model.to(device))
 train_start_time = time.time()
 
 valid_dice_score_max = 0
-for epoch in range(1, epochs+1):
+for epoch in trange(1, epochs+1):
     train_epoch_loss = 0
     train_dice_score = 0
 
@@ -267,8 +267,16 @@ for epoch in range(1, epochs+1):
             print('model_saved')
             valid_dice_score_max = valid_dice_score
             valid_dice_epoch_max = epoch
-            cell1 = 'L'+ str(index+1)
-            cell2 = 'M'+ str(index+1)
+            
+            index = 2
+            while 1:
+                cell = 'B' + str(index)
+                cell_value = worksheet.acell(cell).value
+                if cell_value == time_path:
+                    break
+                index += 1
+            cell1 = 'L'+ str(index)
+            cell2 = 'M'+ str(index)
             worksheet.update_acell(cell1, valid_dice_score_max)
             worksheet.update_acell(cell2, valid_dice_epoch_max)
 
@@ -306,3 +314,6 @@ logdir=logdir,
 # specify which metrics we want to plot
 metrics=["loss", "dice", 'lr', '_base/lr'])
 '''
+
+
+# %%
