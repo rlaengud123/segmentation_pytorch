@@ -42,11 +42,11 @@ arg = easydict.EasyDict({
     "k_folds": 1,
     "BACKBONE": 'resnet34',
     "PRETRAINED": None,
-    "epochs": 150,
+    "epochs": 300,
     "BATCH_SIZE": 32,
     'lr' : 0.001,
     'WORKERS' : 0,
-    'Threshold' : 0.6
+    'Threshold' : 0.7
     })
 
 # 구글스프레드시트 설정
@@ -182,12 +182,16 @@ while 1:
 
 valid_dice_score_max = 0
 valid_dice_epoch_max = 0
+now_score = 0
+now_epoch = 0
 
 arg_list = list(arg.values())
 arg_list.insert(0,time_path)
 arg_list.insert(0,index)
 arg_list.append(valid_dice_score_max)
 arg_list.append(valid_dice_epoch_max)
+arg_list.append(now_score)
+arg_list.append(now_epoch)
 arg_list.append(worker)
 arg_list[5] = 'None'
 worksheet.append_row(arg_list)
@@ -262,23 +266,29 @@ for epoch in range(1, epochs+1):
         print(f'valid_dice_score : {valid_dice_score}')
         print(f'valid_dice_score_max : {valid_dice_score_max}')
 
+        index = 2
+        while 1:
+            cell = 'B' + str(index)
+            cell_value = worksheet.acell(cell).value
+            if cell_value == time_path:
+                break
+                index += 1
+
         if valid_dice_score > valid_dice_score_max:
             torch.save(model.module.state_dict(), './results/{}/best_model.pt'.format(time_path))
             print('model_saved')
             valid_dice_score_max = valid_dice_score
             valid_dice_epoch_max = epoch
 
-            index = 2
-            while 1:
-                cell = 'B' + str(index)
-                cell_value = worksheet.acell(cell).value
-                if cell_value == time_path:
-                    break
-                index += 1
             cell1 = 'L'+ str(index)
             cell2 = 'M'+ str(index)
             worksheet.update_acell(cell1, valid_dice_score_max)
             worksheet.update_acell(cell2, valid_dice_epoch_max)
+
+        cell3 = 'P'+ str(index)
+        cell4 = 'Q'+ str(index)
+        worksheet.update_acell(cell3, valid_dice_score)
+        worksheet.update_acell(cell3, epoch)
 
         if epoch % 5 == 0:
             torch.save(model.module.state_dict(), './results/{}/epoch_{}.pt'.format(time_path, epoch))
@@ -314,6 +324,3 @@ logdir=logdir,
 # specify which metrics we want to plot
 metrics=["loss", "dice", 'lr', '_base/lr'])
 '''
-
-
-# %%
