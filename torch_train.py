@@ -190,8 +190,6 @@ arg_list.insert(0,time_path)
 arg_list.insert(0,index)
 arg_list.append(valid_dice_score_max)
 arg_list.append(valid_dice_epoch_max)
-arg_list.append(now_score)
-arg_list.append(now_epoch)
 arg_list.append(worker)
 arg_list[5] = 'None'
 worksheet.append_row(arg_list)
@@ -266,13 +264,7 @@ for epoch in range(1, epochs+1):
         print(f'valid_dice_score : {valid_dice_score}')
         print(f'valid_dice_score_max : {valid_dice_score_max}')
 
-        index = 2
-        while 1:
-            cell = 'B' + str(index)
-            cell_value = worksheet.acell(cell).value
-            if cell_value == time_path:
-                break
-                index += 1
+
 
         if valid_dice_score > valid_dice_score_max:
             torch.save(model.module.state_dict(), './results/{}/best_model.pt'.format(time_path))
@@ -280,15 +272,20 @@ for epoch in range(1, epochs+1):
             valid_dice_score_max = valid_dice_score
             valid_dice_epoch_max = epoch
 
+            index = 2
+            while 1:
+                cell = 'B' + str(index)
+                cell_value = worksheet.acell(cell).value
+                if cell_value == time_path:
+                    break
+                    index += 1
+
             cell1 = 'L'+ str(index)
             cell2 = 'M'+ str(index)
             worksheet.update_acell(cell1, valid_dice_score_max)
             worksheet.update_acell(cell2, valid_dice_epoch_max)
 
-        cell3 = 'P'+ str(index)
-        cell4 = 'Q'+ str(index)
-        worksheet.update_acell(cell3, valid_dice_score)
-        worksheet.update_acell(cell3, epoch)
+
 
         if epoch % 5 == 0:
             torch.save(model.module.state_dict(), './results/{}/epoch_{}.pt'.format(time_path, epoch))
